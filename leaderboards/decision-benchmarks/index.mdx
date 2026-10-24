@@ -4,10 +4,10 @@ summary: Accuracy and calibration of open Jev-style models on the decision bench
 authors: [harit]
 date: 2026-10-24
 topics: [Calibration, Evaluation, Decision models]
-draft: true
+post: jev-calibration
 ---
 
-The benchmarks AutoTrust and NeoHorse report for their models, scored for calibration as well as accuracy: Kev's decision-v7, transfer-v4 and transfer-v9 suites, VitaminC and MASSIVE, and the original and easy tiers of JevBench. Every reference answer comes from people or from rules. Two more benchmarks, JevBench's hard tier and Nimble, have answers written by language models; they are shown below but left out of the summary.
+The benchmarks AutoTrust and NeoHorse report for their models, scored for calibration as well as accuracy: Kev's decision-v7, transfer-v4 and transfer-v9 suites, VitaminC and MASSIVE, and the original and easy tiers of JevBench. Every reference answer in the summary comes from people or from rules. Two more benchmarks, JevBench's hard tier and Nimble, have answers written by language models; they are shown under "Each benchmark" but left out of the summary.
 
 Questions come in three kinds. Multiple choice picks one of several options, yes/no asks whether a statement holds, and rating places something on an ordered scale. Pick a kind to see how each model handles it.
 
@@ -15,6 +15,12 @@ Questions come in three kinds. Multiple choice picks one of several options, yes
 
 ## How the models were asked
 
-Each server model was sent every question in its native form. JEV models answered multiple-choice and yes/no questions through their own decision slots. Their rating slots are a fixed 0 to 5 scale without level descriptions, so rating questions were asked as multiple choice over the level descriptions.
+Each server model was sent every question in its native form. JEV models answered multiple-choice and yes/no questions through their own decision slots. Their rating slots are a fixed 0 to 5 scale without level descriptions, so rating questions were asked as multiple choice over the level descriptions. We also tried JEV's rating slots with the descriptions written into the question; that was less accurate for both JEV models (62.1% against 64.9% for JEV-27B, 54.0% against 61.5% for JEV-9B).
 
-Kev-4B was trained on decision-v7's training split, so the decision-v7 partitions are in-distribution for it.
+## What to keep in mind
+
+- **Our scores reproduce the published ones closely, with one exception.** Kev-4B and Laya land within half a point of the Kev scores NeoHorse reports. JEV-27B lands 1.8 points below AutoTrust's figure; the rating format does not explain it, and the likely causes are half precision on our older GPUs and how structured inputs are turned into text.
+- **Kev-4B was trained on decision-v7's training split,** so the decision-v7 partitions are in distribution for it.
+- **JPT-4B's server could not answer some inputs,** mostly conversations stored as lists of messages with a "customer" role. Those records are left out of its scores, and the per-benchmark table says how many.
+- **JEV-27B has no results on JevBench's hard tier or Nimble.** Their longest prompts do not fit on our 11 GB GPUs; neither benchmark is in the summary.
+- **Only clean questions are scored.** Kev's suites also contain shuffled and "none of these" variants, which are not used here.

@@ -60,7 +60,7 @@ In September 2026 TypeSafe AI released Jev, a model that does not write text [@t
 
 The selling point of all these models is the probability. A model that says "refund approved, 97%" is supposed to be right about 97% of the time when it says that. This post asks whether that holds on questions with known correct answers. Along the way it covers what calibration actually guarantees, why the most widely reported calibration metric is a poor one, and what to measure instead.
 
-The short answer: pooled over every question we asked, the JEV models are almost perfectly calibrated. Split by dataset, they are underconfident on easy questions and overconfident on hard ones, and the two errors cancel in the pooled number. Every language-model-based decider we tested shows the same pattern. The full results are on the [leaderboard](/leaderboards/jev-calibration/).
+The short answer: pooled over every question we asked, the JEV models are almost perfectly calibrated. Split by dataset, they are underconfident on easy questions and overconfident on hard ones, and the two errors cancel in the pooled number. Every language-model-based decider we tested shows the same pattern. On the decision benchmarks the models' makers use, the same thing happens across kinds of question: a model can be overconfident on multiple choice and underconfident on yes/no at once. The full results are on the [benchmark leaderboard](/leaderboards/jev-calibration/) and the [decision benchmarks leaderboard](/leaderboards/decision-benchmarks/).
 
 ## Why the probability matters
 
@@ -214,6 +214,22 @@ The [leaderboard](/leaderboards/jev-calibration/) has the full results, and a fe
 
 **Pick a dataset.** The dataset menu shows every model on each benchmark separately. That view shows the hard–easy pattern for every model, and the reliability diagram at the bottom shows the shape of the miscalibration for any model and dataset.
 
+## On decision tasks, by kind of question
+
+The benchmarks above are standard multiple-choice tests, and decision models are built for something narrower: routing a ticket, checking a rule, rating a review. So we also ran every model on the decision benchmarks AutoTrust and NeoHorse report for their own models. These are Kev's three decision suites, VitaminC and MASSIVE, and the original and easy tiers of JevBench, about 7,200 questions per model, all with answers from people or from rules.<Sidenote>Two other benchmarks in their reports, JevBench's hard tier and Nimble, have answers written by language models. We ran them but leave them out of every summary.</Sidenote> Our runs reproduce the published accuracy scores for Kev-4B and Laya to within half a point; JEV-27B comes out 1.8 points below AutoTrust's figure.
+
+These benchmarks mix three kinds of question: multiple choice, yes/no, and ratings on an ordered scale. On them, JEV-27B has the best Brier score, 0.099. JEV-9B and JPT-4B follow at 0.101 and 0.102, too close to separate.
+
+The kinds of question pull calibration in different directions. JEV-27B is overconfident on multiple choice, by 0.058 on average, and underconfident on yes/no, by 0.072. Averaged over everything, the two partly cancel. Strands Decider is close to calibrated on multiple choice and badly underconfident on ratings, by 0.245. A threshold tuned on one kind of question will not carry over to another.
+
+<Figure wide caption="Average confidence minus accuracy on each kind of question, on the decision benchmarks with human or rule-based answers. Models are ordered by overall Brier score. A long line means a model's calibration depends strongly on how the question is asked. Hover a point for its numbers.">
+  <TypeGaps />
+</Figure>
+
+Training on Jev's answers shows the same uniform lift as before. The untrained Qwen model is underconfident overall, by 0.095. JEV-9B is slightly overconfident, by 0.037. On yes/no questions the base model was already calibrated, and JEV-9B stays close, slightly underconfident at 0.021, because its accuracy rose more than its confidence.
+
+The benchmark matters as much as the kind of question. On VitaminC, which asks whether evidence supports a claim, six of the eight models are overconfident, among them JEV-27B by 0.121 and Kev-4B by 0.156. On MASSIVE, which sorts assistant requests into scenarios, Kev-4B and Open-Jev are strongly underconfident while the JEV models are overconfident. Kev-4B is close to perfect on Kev's own suites, partly because it was trained on that data.
+
 ## What to do about it
 
 If you deploy one of these models behind a confidence threshold, the threshold will behave differently on easy and hard inputs. Three things help.
@@ -226,7 +242,7 @@ If you deploy one of these models behind a confidence threshold, the threshold w
 
 ## Limitations
 
-Each model was asked in one format, lettered options with the option text attached. A model tuned for a different format may do somewhat better in its authors' own tests. We cover seven datasets, all multiple choice, and decision models are also used for yes-or-no and scale questions we did not test. One very long GPQA question is missing from JEV-27B's results because it did not fit in memory. Finally, we have not yet run TypeSafe's own Jev on these questions. That comparison would show whether the hard–easy pattern lives in the teacher too, and it is next.
+On the multiple-choice benchmarks, each model was asked in one format, lettered options with the option text attached. A model tuned for a different format may do somewhat better in its authors' own tests. On the decision benchmarks, JEV's rating slots cannot show what each level means, so we asked rating questions as multiple choice over the level descriptions; that was more accurate than the alternative we tried. JPT-4B's server could not read some inputs and skipped about 2% of the decision-benchmark questions. One very long GPQA question is missing from JEV-27B's results because it did not fit in memory. Finally, we have not yet run TypeSafe's own Jev on these questions. That comparison would show whether the hard–easy pattern lives in the teacher too, and it is next.
 
 ## Run it yourself
 

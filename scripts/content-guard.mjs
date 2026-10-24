@@ -11,7 +11,7 @@
 import { visit } from 'unist-util-visit';
 
 export const COMPONENTS = new Set([
-  'Sidenote', 'Figure', 'CalibrationShift', 'ReliabilityPair', 'EceEstimators', 'ModelBars', 'JevBoard', 'DecisionBoard',
+  'Sidenote', 'Figure', 'CalibrationShift', 'ReliabilityPair', 'EceEstimators', 'ModelBars', 'JevBoard', 'DecisionBoard', 'TypeGaps',
 ]);
 const BLOCKED_TAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'link', 'meta', 'base']);
 const SCALAR = String.raw`(?:true|false|-?\d+(?:\.\d+)?|"[^"\\]*"|'[^'\\]*')`;

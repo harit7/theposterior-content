@@ -10,3 +10,4 @@
 | `<ModelBars />` | Every model's summary scores with 95% intervals (JEV study data) |
 | `<JevBoard />` | The full JEV calibration leaderboard |
 | `<DecisionBoard />` | The decision-benchmark leaderboard, by question type |
+| `<TypeGaps />` | Confidence minus accuracy by question type for each model (decision benchmarks) |
