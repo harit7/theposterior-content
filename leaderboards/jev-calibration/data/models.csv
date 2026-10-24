@@ -1,0 +1,9 @@
+model,license,maker,card,backbone,backbone_card,total_parameters_b,fine_tuned,trained_parameters_m,trained_on,released
+JEV-27B,Apache-2.0,AutoTrust AI,https://huggingface.co/autotrust/JEV-27B,Qwen3.8-27B,https://huggingface.co/Qwen/Qwen3.8-27B,25.6,True,108.9,Jev 1.13's answers,2026-10-01
+JEV-9B,Apache-2.0,AutoTrust AI,https://huggingface.co/autotrust/JEV-9B,Qwen3.5-9B,https://huggingface.co/Qwen/Qwen3.5-9B,7.9,True,40.2,Jev 1.13's answers,2026-09-23
+"Qwen3.5-9B, untrained",Apache-2.0,Alibaba Qwen,https://huggingface.co/Qwen/Qwen3.5-9B,Qwen3.5-9B,https://huggingface.co/Qwen/Qwen3.5-9B,7.9,False,,,2026-03-02
+Kev-4B,Apache-2.0,Jared Palmer,https://huggingface.co/jaredpalmer/kev-4b,Qwen3.5-4B-Base,https://huggingface.co/Qwen/Qwen3.5-4B-Base,4.7,True,33.8,"public datasets and generated examples, no Jev outputs",2026-09-24
+JPT-4B,CC BY-NC 4.0,kirp,https://huggingface.co/kirp/jpt-4b,Qwen3.5-4B,https://huggingface.co/Qwen/Qwen3.5-4B,4.5,True,,its own typed-question mix (LoRA merged into the weights),2026-09-24
+Strands Decider 2B,Apache-2.0,Amazon Strands Labs,https://huggingface.co/StrandsAgents/strands-decider-2B-qwen3.5-v1-2610,Qwen3.5-2B-Base,https://huggingface.co/Qwen/Qwen3.5-2B-Base,2.3,True,53.7,Amazon's published decision data,2026-10-09
+Open-Jev-2B,Apache-2.0,Zefan Cai,https://huggingface.co/ZefanCai/Open-Jev-2B,Qwen3.5-2B,https://huggingface.co/Qwen/Qwen3.5-2B,2.3,True,2.5,programmatically labelled tasks,2026-09-20
+Laya,Apache-2.0,Convai Innovations,https://huggingface.co/convaiinnovations/laya,ModernBERT-large,https://huggingface.co/answerdotai/ModernBERT-large,0.421,True,421.0,"its own decision data, whole encoder trained (395M ModernBERT-large plus a 26M head)",2026-09-19

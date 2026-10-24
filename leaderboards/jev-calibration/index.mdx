@@ -1,0 +1,18 @@
+---
+title: JEV calibration leaderboard
+summary: Whether open Jev-style decision models are right as often as they say they are, measured against human gold labels on standard benchmarks.
+authors: [harit]
+date: 2026-10-24
+topics: [Calibration, Evaluation, Decision models]
+post: jev-calibration
+---
+
+Eight models, scored on accuracy, expected calibration error (ECE) and the Brier score. Pick a dataset to see every model on it, or a model to see its reliability diagram.
+
+<JevBoard />
+
+## Models
+
+JEV-9B and JEV-27B are AutoTrust's open copies of Jev, trained on Jev's own answers. Qwen3.5-9B, untrained, is the same base model read out the same way without that training. The other rows are Jev-style models from other teams, each run through the server its authors ship. Each model name links to its model card.
+
+Each model was asked with lettered options, the format Jev's documentation uses. A model tuned to another format may score a little lower here than in its authors' own tests.
