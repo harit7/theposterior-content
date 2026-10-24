@@ -1,6 +1,6 @@
 ---
 title: How well do JEV models know when they are right?
-summary: Open decision models now return a probability with every answer, and their makers say those probabilities are calibrated. We test that claim against human gold labels, explain what calibration does and does not guarantee, and look at why the most popular calibration metric misleads.
+summary: When a decision model says it's 97% sure, how often is it right? We checked eight open models against real answers. On average, beautifully. Up close, it depends on the question.
 authors: [harit]
 date: 2026-10-24
 topics: [Calibration, Evaluation, Decision models]
@@ -56,197 +56,187 @@ references:
     url: https://arxiv.org/abs/2107.07511
 ---
 
-In September 2026 TypeSafe AI released Jev, a model that does not write text [@typesafe]. You give it some context, a question and a list of allowed answers, and it returns a probability for each answer in a single forward pass. Within weeks, AutoTrust AI released open copies called JEV-9B and JEV-27B and reported a calibration error below 0.001 [@autotrust]. Several other teams followed with their own versions.
+Imagine you run customer support for an online shop. A model reads each refund request and replies with a verdict and a number: *approve, 97%*. You set a simple rule. Anything above 95% goes through automatically, and everything else goes to a person.
 
-The selling point of all these models is the probability. A model that says "refund approved, 97%" is supposed to be right about 97% of the time when it says that. This post asks whether that holds on questions with known correct answers. Along the way it covers what calibration actually guarantees, why the most widely reported calibration metric is a poor one, and what to measure instead.
+That rule quietly assumes something: when the model says 97%, it's right about 97 times out of 100. If it's really right 80 times out of 100 on some kinds of request, your automatic lane is approving plenty of mistakes, and nothing in your logs will tell you.
 
-The short answer: pooled over every question we asked, the JEV models are almost perfectly calibrated. Split by dataset, they are underconfident on easy questions and overconfident on hard ones, and the two errors cancel in the pooled number. Every language-model-based decider we tested shows the same pattern. On the decision benchmarks the models' makers use, the same thing happens across kinds of question: a model can be overconfident on multiple choice and underconfident on yes/no at once. The full results are on the [benchmark leaderboard](/leaderboards/jev-calibration/) and the [decision benchmarks leaderboard](/leaderboards/decision-benchmarks/).
+A new family of models makes exactly this promise. So we put the promise to the test.
 
-## Why the probability matters
+## A model that only answers questions
 
-Most uses of a decision model come down to a threshold. Act automatically when the model is at least 95% sure, and send everything else to a person. Approve the transaction above 0.9, block it below 0.2, review the rest. The threshold is chosen once and then trusted on every input.
+In September 2026, TypeSafe AI released Jev [@typesafe]. It doesn't chat or write essays. You hand it some context, a question and a list of allowed answers, and it hands back a probability for each answer. One pass through the network, a few hundred milliseconds, done.
 
-That only works if 95% means the same thing everywhere. If the model's 95% is right 99% of the time on one kind of question and 80% of the time on another, a single threshold gives you very different error rates depending on what traffic arrives that day. The probability is the interface between the model and every system built on top of it. When it drifts, everything downstream drifts with it, silently.
+Within weeks AutoTrust AI released open copies, JEV-9B and JEV-27B. They were built by teaching a Qwen language model to imitate Jev's answers on about half a million examples [@autotrust].<Sidenote>This is called distillation. The student learns to copy the teacher's probabilities, including its mistakes and its doubts.</Sidenote> Other teams followed with their own models, trained on their own data: Kev, JPT, Strands Decider, Open-Jev and Laya. They all speak the same request format, so we can ask every one of them the same questions.
 
-## What JEV is
+AutoTrust's model card says JEV's calibration error is below 0.001. That's a remarkable number. Let's see what it means.
 
-Jev is the first of what TypeSafe calls System One models: models that make a fast, typed decision instead of generating text [@typesafe]. A request names a question type, such as a choice between labelled options, a yes-or-no judgement, or a position on a scale, and the model fills in a probability for each allowed answer. There is no sampling and no parsing of free text, so the answer always has the requested shape.
+## What "calibrated" promises
 
-JEV-9B and JEV-27B are AutoTrust's open reproductions [@autotrust]. Each freezes a Qwen language model, adds a small adapter and a dedicated output head, and trains only those new parts to match Jev's own answers on about half a million examples.<Sidenote>Training to match another model's probabilities is called distillation. The student learns the teacher's beliefs, including its mistakes and its uncertainty.</Sidenote> The other open models we test, Kev, JPT, Strands Decider, Open-Jev and Laya, were built by other teams on their own data. All of them speak the same request format, which makes a fair comparison possible.
+Think of a weather forecaster. Collect every day she said "70% chance of rain". If it rained on about 70% of those days, and the same holds for her 20% days and her 90% days, she's calibrated. Her numbers mean what they say.
 
-## What calibration means
-
-Take every question where the model's top answer came with a confidence of about 70%. If the model is calibrated, about 70% of those top answers are correct. The same must hold at every confidence level. Written out for the top answer $\hat y$ and its probability $\hat p$:
+A decision model works the same way. Take every answer it gave with about 70% confidence. If about 70% of those answers were right, and the same holds at every other confidence level, the model is calibrated [@guo2017]. In symbols, for the top answer $\hat y$ and its confidence $\hat p$:
 
 $$
 \Pr\bigl(\hat y = y \mid \hat p = p\bigr) = p \quad \text{for every } p \in [0, 1]
 $$
 
-This is called top-label or confidence calibration [@guo2017]. A stronger version asks the whole probability vector to be right, including the probabilities on the answers the model did not pick. Top-label calibration is the version that matters for thresholds, and it is the one we measure.
+Here's the catch with AutoTrust's 0.001. It compares JEV's probabilities with Jev's probabilities, on Jev's own training topics. It measures how faithfully the copy imitates its teacher. No correct answers appear anywhere in that measurement, so a perfect copy of a badly calibrated teacher would score just as well.
 
-A reliability diagram shows calibration directly. Group the questions by stated confidence, then plot each group's accuracy against its confidence. A calibrated model lies on the diagonal. Bars above the diagonal mean the model undersells itself, and bars below it mean the model oversells.
+So we checked against the truth. We asked all eight models the same 21,150 questions from seven benchmarks with known answers: MMLU, ARC-Challenge, CommonsenseQA, OpenBookQA, TruthfulQA, GPQA Diamond, and Under Pressure, a set of intent, emotion and topic questions with 2 to 16 options.<Sidenote>Each model was asked through the server its authors ship, with lettered options, the format Jev's documentation uses. One very long GPQA question is missing from JEV-27B's results.</Sidenote>
 
-### Calibrated against what?
+## First look: nearly perfect
 
-AutoTrust's figure of 0.001 compares JEV's probabilities with Jev's probabilities on Jev's own training topics [@autotrust]. That measures how faithfully the copy reproduces its teacher. It says nothing about whether either model's probabilities match how often their answers are right, because no correct answers are involved. A copy can match a miscalibrated teacher perfectly.
+Throw all 21,150 questions into one pile and JEV-9B looks superb. Its calibration error is 0.010. When it says 80%, it's right very close to 80% of the time.
 
-So in this study every number is computed against human gold labels from standard benchmarks, where the right answer is known.
+Then split the pile by benchmark.
 
-## Calibration is not enough
+## Second look: it depends on the question
 
-Calibration is easy to satisfy in a useless way. Suppose a model answers questions correctly 77% of the time. Replace every confidence it reports with 77%. The new model makes exactly the same choices, and it is perfectly calibrated: among questions where it says 77%, which is all of them, it is right 77% of the time. It is also useless for deciding which answers to trust, because it gives every answer the same score.
+On easy benchmarks, JEV-9B is right more often than it claims. It answers 94% of ARC questions correctly and still sounds less sure than that. On hard benchmarks it's the other way round. On GPQA, a set of graduate-level science questions, it's right 36% of the time and overstates its confidence by about 12 points.
 
-What the constant model lacks is called refinement, sharpness or resolution [@degroot1983]: the ability to give high confidence to answers that turn out right and low confidence to answers that turn out wrong. A good probability needs both properties. Calibration makes the numbers honest. Resolution makes them informative.
+<Figure wide caption="How to read these: each bar is a group of answers given with similar confidence. Its height shows how many were right, and the dark tick shows how confident the model said it was. On the dashed line the two match. On ARC, the easiest benchmark, the bars rise above their ticks and the model undersells itself. On GPQA, the hardest, they fall below and it oversells.">
+  <ReliabilityPair model="JEV-9B" datasets={['ARC-Challenge', 'GPQA Diamond']} />
+</Figure>
 
-There is a second gap. Calibration is an average over everything the model sees. A model can be calibrated over all its traffic while being badly overconfident on one slice and underconfident on another, as long as the errors cancel. This is exactly what we find with JEV. The fix in theory is to demand calibration on many slices at once, an idea formalised as multicalibration [@hebert2018]. In practice it means you should always check calibration on the slices you care about, and distrust any single pooled number.
+Measured benchmark by benchmark and then averaged, JEV-9B's calibration error is 0.064, six times the pooled figure. The two mistakes cancel when you pool everything, and that's why the pooled number looks so good.
 
-## The trouble with ECE
+People do this too. Psychologists call it the hard–easy effect: we're overconfident on hard questions and underconfident on easy ones [@lichtenstein1977]. One plausible reason models share it is that confidence tracks how familiar a question looks more than whether this particular answer is right. So it moves less than accuracy does as the questions get harder.
 
-The most widely reported calibration metric is the expected calibration error, ECE. Sort the questions into bins by confidence, take the gap between each bin's average confidence and its accuracy, and average the gaps, weighted by bin size [@guo2017]:
+## Where the pattern comes from
+
+We can watch it form. JEV-9B is built on Qwen3.5-9B, so we asked the untrained Qwen model the same questions. Before training, it's underconfident on six of the seven benchmarks. Training on Jev's answers raises its confidence on all of them by a similar amount, between 0.05 and 0.16.
+
+That one-size lift is just right for the middling benchmarks, too small for the easiest and too big for the hardest.
+
+<Figure wide caption="Average confidence minus accuracy on each benchmark, easiest at the top. Left of zero the model undersells itself, and right of zero it oversells. Hollow circles show the model before training and filled circles after. Every row moves right by a similar distance, which fixes the middle rows and pushes GPQA and Under Pressure past zero. Hover a row for its numbers.">
+  <CalibrationShift before="Qwen3.5-9B, untrained" after="JEV-9B" beforeLabel="Qwen3.5-9B before training" afterLabel="JEV-9B after training" />
+</Figure>
+
+The usual repair is temperature scaling: divide the model's scores by one number, which softens or sharpens every probability at once [@guo2017]. We found the best temperature for each benchmark. It runs from 0.67 on ARC and OpenBookQA to 1.98 on GPQA. No single number can serve both ends. Tune one on your own traffic and you'll fix your average, while the split between easy and hard questions stays.
+
+## It isn't just JEV
+
+The other teams never saw Jev's answers. Kev, JPT, Strands Decider and Open-Jev show the same shape anyway: cautious on easy benchmarks, too sure on hard ones. So JEV didn't inherit this from Jev. It seems to come with reading a probability off a language model in one pass. The odd one out is Laya, a small encoder model, which is overconfident on every benchmark.
+
+<Figure wide caption="Each model's average over the seven benchmarks, with 95% intervals from resampling questions. Lower is better for the Brier score and ECE, and higher is better for accuracy. Switch metrics and watch the order change.">
+  <ModelBars />
+</Figure>
+
+That chart lets you rank by three different scores, and they don't agree. Before we can say who's best, we need to settle how to keep score.
+
+## How do you score a probability?
+
+### The 77% trick
+
+Here's a fun way to cheat. Take JEV-9B, which is right 77.4% of the time across our questions. Keep every answer it picks, and replace every confidence it reports with 77.4%. This new model is perfectly calibrated: it always says 77.4%, and it's right 77.4% of the time.
+
+It's also useless. It can't tell you which answers to trust, because every answer gets the same number. Calibration makes a model's numbers honest. A good model also needs them to be informative, high for answers that turn out right and low for answers that turn out wrong. Forecasters call that resolution [@degroot1983].
+
+### Why ECE falls for it
+
+The most widely reported calibration metric is the expected calibration error, ECE. Sort answers into bins by confidence, measure the gap between confidence and accuracy in each bin, and average the gaps [@guo2017]:
 
 $$
 \mathrm{ECE} = \sum_{b=1}^{B} \frac{|B_b|}{n}\,\bigl|\,\mathrm{acc}(B_b) - \mathrm{conf}(B_b)\,\bigr|
 $$
 
-ECE is intuitive, since it is the average distance from the diagonal of a reliability diagram. It also has serious problems.
+The 77% trick scores a perfect zero. ECE only checks honesty, so it can't tell a useful model from a useless one. It has a few other quirks too:
 
-**It depends on choices that have nothing to do with the model.** The number of bins, and whether bins have equal width or equal numbers of questions, change the answer [@nixon2019]. With few questions per bin the estimate is noisy, and with many questions per bin it hides detail.
+- **The score depends on how you draw the bins.** Change their number or their widths and it moves [@nixon2019].
+- **Small samples look miscalibrated.** Even a perfectly calibrated model shows some ECE on a finite set of questions [@kumar2019; @roelofs2022]. On GPQA's 198 questions, that noise floor is 0.079, half of JEV-9B's measured 0.157.<Sidenote>We estimate the floor by simulating a perfectly calibrated model with the same confidences: each answer comes out right with probability equal to its confidence.</Sidenote>
+- **It jumps.** Nudge one confidence across a bin edge and the score changes abruptly [@blasiok2023].
 
-**It is biased upward, especially on small datasets.** Even a perfectly calibrated model shows a positive ECE on a finite sample, because each bin's accuracy is estimated from a handful of questions [@kumar2019; @roelofs2022]. We estimate this noise floor for every result by simulating a perfectly calibrated model with the same confidences and the same number of questions.<Sidenote>For each question we draw a correct or wrong outcome with probability equal to the model's confidence, compute ECE on the simulated outcomes, and average over many draws.</Sidenote> On GPQA, with 198 questions, the floor is 0.079, half of JEV-9B's measured ECE of 0.157. Some of what looks like miscalibration is just a small sample.
-
-<Figure wide caption="Three ways of estimating ECE for JEV-9B on each dataset, with the noise floor shaded. Datasets run from most to fewest questions. On large datasets the estimators agree and the floor is small. On small ones they disagree and the floor grows. On TruthfulQA the measured ECE sits below the floor, and the debiased estimator returns zero. Hover a row for exact values.">
+<Figure wide caption="Three ways of computing ECE for JEV-9B on each benchmark, with the noise floor shaded. Benchmarks run from most questions to fewest. On big benchmarks the three agree and the floor is tiny. On small ones they spread out and the floor grows. On TruthfulQA the measured ECE sits below the floor, and the debiased version comes out at zero. Hover a row for exact values.">
   <EceEstimators model="JEV-9B" />
 </Figure>
 
-**It can be gamed, and it cannot tell useful models from useless ones.** The constant model from the previous section has an ECE of zero. So does any model that hedges every answer to its average accuracy. ECE rewards honesty and ignores informativeness, which means a lower ECE does not mean a better model.
+Better versions exist: a debiased ECE [@kumar2019], a bin-free version based on the Kolmogorov–Smirnov test [@gupta2021], and smooth ECE [@smoothece]. They mostly agree with each other, and none of them catches the 77% trick.
 
-**It jumps.** Nudge one prediction across a bin boundary and ECE can change abruptly, so it is not a smooth function of the model's outputs. This makes it a shaky basis for comparing models and an awkward thing to optimise [@blasiok2023].
+### The Brier score sees through it
 
-There are better estimators. A debiased version subtracts the expected sampling error [@kumar2019]. The Kolmogorov–Smirnov calibration error avoids bins by comparing cumulative curves [@gupta2021]. Smooth ECE replaces bins with a kernel and comes with a principled reliability diagram [@smoothece]. We report several of these on the leaderboard and they mostly agree on rankings. None of them fixes the deeper problem, which is that any calibration metric alone ignores resolution. For comparing models you want a score that rewards both.
-
-## The Brier score, and why proper matters
-
-The Brier score is the oldest answer to that problem [@brier1950]. For the top-label version, it is the squared gap between the model's confidence and the outcome:
+The Brier score comes from 1950s weather forecasting [@brier1950]. For each answer, take the model's confidence, subtract 1 if the answer was right and 0 if it was wrong, square the result, and average:
 
 $$
 \mathrm{Brier} = \frac{1}{n} \sum_{i=1}^{n} \bigl(\hat p_i - \mathbb{1}[\hat y_i = y_i]\bigr)^2
 $$
 
-A confident right answer scores near 0, and a confident wrong answer scores near 1. It needs no bins and has no tuning knobs.
+Say 95% and be right, and you pay 0.0025. Say 95% and be wrong, and you pay 0.9025. That asymmetry is the whole idea.
 
-Its key property is that it is a strictly proper scoring rule [@gneiting2007]. A scoring rule is proper if a forecaster minimises their expected score by reporting what they actually believe. You can see this for Brier in one line. If the true chance of being right is $p$ and the model reports $q$, the expected score is
+The Brier score is a proper scoring rule [@gneiting2007]: your best strategy is to report what you actually believe. One line shows why. If the real chance of being right is $p$ and you report $q$, your expected score is
 
 $$
 \mathbb{E}\bigl[(q - Y)^2\bigr] = (q - p)^2 + p(1 - p)
 $$
 
-which is smallest exactly when $q = p$. No amount of hedging or exaggeration helps. ECE has no such property, which is why the constant model can game it.
+The first term disappears only when you tell the truth, $q = p$. The second is the price of the question being hard, and no amount of spin changes it.
 
-The Brier score also splits cleanly into the two properties from earlier [@murphy1973]:
+Better still, the Brier score splits into the pieces we care about [@murphy1973]:
 
 $$
 \mathrm{Brier} = \underbrace{\mathrm{reliability}}_{\text{miscalibration}} - \underbrace{\mathrm{resolution}}_{\text{informativeness}} + \underbrace{\mathrm{uncertainty}}_{\text{difficulty}}
 $$
 
-Reliability is the calibration error, measured as a squared gap. Resolution measures how much the model's confidence separates right answers from wrong ones. Uncertainty depends only on accuracy, and it is the score of the constant model. Here is the split for JEV-9B and its untrained base model, pooled over all 21,150 questions:
+Here's that split for JEV-9B, its untrained base model, and the 77% trick, over all 21,150 questions:
 
 | | Accuracy | Reliability | Resolution | Uncertainty | Brier |
 |---|---|---|---|---|---|
 | Qwen3.5-9B, before training | 74.0% | 0.0136 | 0.0446 | 0.1926 | 0.161 |
 | JEV-9B | 77.4% | 0.0001 | 0.0445 | 0.1751 | 0.131 |
-| JEV-9B's answers, constant 77.4% confidence | 77.4% | 0 | 0 | 0.1751 | 0.175 |
+| The 77% trick | 77.4% | 0 | 0 | 0.1751 | 0.175 |
 
-Three things stand out. Training removed almost all the pooled miscalibration. It left resolution unchanged: the trained model separates its right answers from its wrong ones no better than the base model did. And the Brier improvement comes from those two sources plus higher accuracy, which lowers the uncertainty term. The constant model in the last row has perfect calibration and the worst Brier score of the three, which is the correct ranking.<Sidenote>These terms are estimated from the same confidence bins as the reliability diagrams, so they carry a small binning error. The sum matches the directly computed Brier score to within 0.001.</Sidenote>
+Read it row by row. Training wiped out nearly all the pooled miscalibration. It left resolution exactly where it was: the trained model separates right answers from wrong ones no better than the base model did. And the 77% trick, perfectly calibrated, gets the worst Brier score of the three, exactly as it should.<Sidenote>These terms come from the same confidence bins as the reliability diagrams, so they carry a small binning error. Their sum matches the directly computed Brier score to within 0.001.</Sidenote>
 
-## What the Brier score misses
+### Where the Brier score falls short
 
-The Brier score is the right default for comparing models, but it has its own blind spots.
+It's the right default, with four blind spots worth knowing:
 
-**It mixes difficulty with quality.** The uncertainty term depends only on how hard the questions are. A Brier score of 0.22 on GPQA and 0.04 on ARC mostly reflects that GPQA is hard. Brier scores are comparable between models on the same questions and meaningless across datasets.
+- **Hard questions inflate it.** GPQA's 0.22 next to ARC's 0.04 mostly says GPQA is hard. Only compare models on the same questions.
+- **It forgives confident mistakes.** Being wrong at 99% costs 0.98, barely more than being wrong at 90%, which costs 0.81. Log loss charges 4.6 and 2.3. If one confident mistake can sink you, use log loss.
+- **The usual version ignores the runner-up answers.** If you care about the whole distribution, use the multiclass Brier score, which sums over every option.
+- **It averages over every possible threshold** [@hernandez2012]. You probably use one. If you know yours, measure error rates there too.
 
-**It forgives confident mistakes.** The penalty is bounded at 1. A wrong answer given at 99% costs 0.98, barely more than one given at 90%, which costs 0.81. Log loss charges 4.6 and 2.3 for the same two mistakes, and it grows without limit as confidence approaches certainty. If one confidently wrong decision is catastrophic for you, log loss or a cost-weighted metric fits better. We report log loss on the leaderboard too.
+## Back to the scoreboard
 
-**The top-label version scores only the chosen answer.** It is proper for the event "the top answer is right" and says nothing about how the model spreads its remaining probability over the other options. When the full distribution matters, for instance to build prediction sets, use the multiclass Brier score, which sums over every option and runs from 0 to 2. Our data files include it.
+Ranked by Brier score, JEV-27B comes first. JPT-4B and JEV-9B tie for second and third, because their intervals overlap, and JPT-4B is less than half JEV-9B's size. The untrained Qwen model and Strands Decider tie for fifth and sixth.
 
-**It averages over every possible threshold.** The Brier score equals the expected cost of thresholded decisions when every threshold is equally likely [@hernandez2012]. Real deployments use one threshold, or a narrow range. A model can have the better Brier score and still be worse at the 95% threshold you actually use. If you know your operating point, measure error rates there.
+Rank by ECE instead and two pairs swap places. JEV-9B edges past JPT-4B, and Strands Decider jumps ahead of the untrained Qwen model. Strands Decider's confidences sit closer to its accuracy, but its accuracy is much lower, and the Brier score counts both. Read only the ECE column and you'd pick the worse model.
 
-## What we measured
+The [leaderboard](/leaderboards/jev-calibration/) has every benchmark, plus a reliability diagram for every model.
 
-We asked eight models the same questions from seven datasets: MMLU, ARC-Challenge, CommonsenseQA, OpenBookQA, TruthfulQA, GPQA Diamond, and Under Pressure, a benchmark of intent, emotion and topic questions with 2 to 16 options. Each model was asked through the server its authors ship, with lettered options, the format Jev's documentation uses. Every model saw the same 21,150 questions, apart from one GPQA question missing for JEV-27B, and every score is computed against the benchmark's gold answer. Intervals are 95% bootstrap intervals from resampling questions.
+## The jobs these models were built for
 
-## Underconfident on easy questions, overconfident on hard ones
+Exam questions are a tough test, and decision models are built for narrower jobs: routing a ticket, checking a rule, rating a review. So we also ran every model on the decision benchmarks AutoTrust and NeoHorse use for their own models. That's Kev's three decision suites, VitaminC, MASSIVE and JevBench, about 7,200 questions per model, all with answers from people or from rules.<Sidenote>Two more benchmarks in their reports, JevBench's hard tier and Nimble, have answers written by language models. We ran them and kept them out of every summary.</Sidenote> As a sanity check, our accuracy scores for Kev-4B and Laya land within half a point of the published ones. JEV-27B comes out 1.8 points lower.
 
-Pooled over all 21,150 questions, JEV-9B's ECE is 0.010, close to perfect. Computed per dataset and then averaged, it is 0.064, six times higher. The gap between those two numbers is the whole story.
+These benchmarks mix three kinds of question: multiple choice, yes/no, and ratings on a scale. JEV-27B has the best Brier score, 0.099, with JEV-9B and JPT-4B right behind at 0.101 and 0.102.
 
-On easy benchmarks the model is right more often than it claims. On ARC it answers 94% of questions correctly but reports less confidence than that. On hard benchmarks it claims more than it delivers. On GPQA, a set of graduate-level science questions, it is right 36% of the time and overstates its confidence by about 12 points on average.
+And the cancelling act shows up again, this time across kinds of question. JEV-27B is overconfident on multiple choice, by 0.058, and underconfident on yes/no, by 0.072. Strands Decider is nearly calibrated on multiple choice and badly underconfident on ratings, by 0.245. A threshold tuned on one kind of question won't carry over to another.
 
-<Figure wide caption="Reliability diagrams for JEV-9B on ARC-Challenge, the easiest dataset, and GPQA Diamond, the hardest. Bars show the share answered correctly in each confidence range, dark ticks show the confidence the model stated, and the dashed line is perfect calibration. On ARC most bars rise above their ticks. On GPQA most fall below.">
-  <ReliabilityPair model="JEV-9B" datasets={['ARC-Challenge', 'GPQA Diamond']} />
-</Figure>
-
-Psychologists know this pattern from people. Lichtenstein and Fischhoff called it the hard–easy effect: we are overconfident on hard questions and underconfident on easy ones [@lichtenstein1977]. One plausible reason it appears in models too: a confidence score may track how familiar a question looks more than how likely this particular answer is to be right, so it moves less than accuracy does as difficulty changes.
-
-Comparing JEV-9B with its own base model shows where the pattern comes from. The untrained Qwen model is underconfident on six of the seven datasets, all except GPQA. Training on Jev's answers raises its confidence on every dataset by a similar amount, between 0.05 and 0.16. That lift is exactly right for middling datasets, too small for the easiest ones, and too much for the hardest.
-
-<Figure wide caption="Average confidence minus accuracy on each dataset, ordered from easiest to hardest, before and after training. Left of zero the model undersells itself, and right of zero it oversells. Training shifts every dataset to the right by a similar amount. That fixes the middling datasets and pushes GPQA and Under Pressure into overconfidence. Hover a row for its numbers.">
-  <CalibrationShift before="Qwen3.5-9B, untrained" after="JEV-9B" beforeLabel="Qwen3.5-9B before training" afterLabel="JEV-9B after training" />
-</Figure>
-
-## Why one temperature cannot fix it
-
-The standard repair for a miscalibrated model is temperature scaling: divide the model's scores by one number before turning them into probabilities, choosing the number on held-out data [@guo2017]. A temperature above 1 softens overconfident predictions, and one below 1 sharpens underconfident ones.
-
-For each dataset we found the temperature that would make JEV-9B best calibrated against the gold labels. It ranges from 0.67 on ARC and OpenBookQA to 1.98 on GPQA. No single number serves both ends. A temperature tuned on a mix of questions repairs the average and leaves the hard–easy pattern in place, and one tuned on one dataset makes others worse. Temperature scaling is still worth doing, but only on data that looks like your own traffic.
-
-## Eight models, one pattern
-
-The other teams' models were trained on their own data, without Jev's answers. Kev, JPT, Strands Decider and Open-Jev all show the same shape: cautious on easy benchmarks and too sure on hard ones. So the pattern is not something the JEV copies inherited from Jev. It seems to come with reading a probability off a language model in a single pass. The one exception is Laya, a small encoder model rather than a language model, which is overconfident on every dataset.
-
-<Figure wide caption="Each model's average over the seven datasets, with 95% bootstrap intervals. Lower is better for the Brier score and ECE, and higher is better for accuracy. Switch metrics to see how the order changes.">
-  <ModelBars />
-</Figure>
-
-The [leaderboard](/leaderboards/jev-calibration/) has the full results, and a few things on it are worth reading closely.
-
-**Ranks come with ranges.** Each model's rank by Brier score is shown with the range of ranks its 95% interval allows. JEV-27B is clearly first. JPT-4B and JEV-9B share second and third, because their intervals overlap. JPT-4B is less than half the size of JEV-9B and matches it. The untrained Qwen model and Strands Decider share fifth and sixth.
-
-**The metric changes the order.** Ranked by ECE, JEV-9B edges ahead of JPT-4B, and Strands Decider moves ahead of the untrained Qwen model. Ranked by Brier score or by log loss, both pairs flip back. Strands Decider is the clearer case: its confidences are closer to its accuracy, but its accuracy is much lower, and a proper score counts both. If you only read the ECE column, you would pick a worse model.
-
-**Pick a dataset.** The dataset menu shows every model on each benchmark separately. That view shows the hard–easy pattern for every model, and the reliability diagram at the bottom shows the shape of the miscalibration for any model and dataset.
-
-## On decision tasks, by kind of question
-
-The benchmarks above are standard multiple-choice tests, and decision models are built for something narrower: routing a ticket, checking a rule, rating a review. So we also ran every model on the decision benchmarks AutoTrust and NeoHorse report for their own models. These are Kev's three decision suites, VitaminC and MASSIVE, and the original and easy tiers of JevBench, about 7,200 questions per model, all with answers from people or from rules.<Sidenote>Two other benchmarks in their reports, JevBench's hard tier and Nimble, have answers written by language models. We ran them but leave them out of every summary.</Sidenote> Our runs reproduce the published accuracy scores for Kev-4B and Laya to within half a point; JEV-27B comes out 1.8 points below AutoTrust's figure.
-
-These benchmarks mix three kinds of question: multiple choice, yes/no, and ratings on an ordered scale. On them, JEV-27B has the best Brier score, 0.099. JEV-9B and JPT-4B follow at 0.101 and 0.102, too close to separate.
-
-The kinds of question pull calibration in different directions. JEV-27B is overconfident on multiple choice, by 0.058 on average, and underconfident on yes/no, by 0.072. Averaged over everything, the two partly cancel. Strands Decider is close to calibrated on multiple choice and badly underconfident on ratings, by 0.245. A threshold tuned on one kind of question will not carry over to another.
-
-<Figure wide caption="Average confidence minus accuracy on each kind of question, on the decision benchmarks with human or rule-based answers. Models are ordered by overall Brier score. A long line means a model's calibration depends strongly on how the question is asked. Hover a point for its numbers.">
+<Figure wide caption="Average confidence minus accuracy on each kind of question, on the decision benchmarks with answers from people or rules. Models are ordered by overall Brier score. A long line means a model's calibration depends a lot on how you ask. Hover a point for its numbers.">
   <TypeGaps />
 </Figure>
 
-Training on Jev's answers shows the same uniform lift as before. The untrained Qwen model is underconfident overall, by 0.095. JEV-9B is slightly overconfident, by 0.037. On yes/no questions the base model was already calibrated, and JEV-9B stays close, slightly underconfident at 0.021, because its accuracy rose more than its confidence.
+The benchmark matters too. On VitaminC, which asks whether evidence supports a claim, six of the eight models are overconfident, JEV-27B by 0.121 and Kev-4B by 0.156. On MASSIVE, which sorts assistant requests into topics, Kev-4B and Open-Jev undersell themselves while the JEV models oversell. Kev-4B is close to perfect on Kev's own suites, which it was partly trained on. The [decision benchmarks leaderboard](/leaderboards/decision-benchmarks/) breaks all of this down by kind of question.
 
-The benchmark matters as much as the kind of question. On VitaminC, which asks whether evidence supports a claim, six of the eight models are overconfident, among them JEV-27B by 0.121 and Kev-4B by 0.156. On MASSIVE, which sorts assistant requests into scenarios, Kev-4B and Open-Jev are strongly underconfident while the JEV models are overconfident. Kev-4B is close to perfect on Kev's own suites, partly because it was trained on that data.
+## So what should you do?
 
-## What to do about it
+Back to the refund queue. Your 95% threshold will let through more mistakes on hard requests than on easy ones. Three habits help.
 
-If you deploy one of these models behind a confidence threshold, the threshold will behave differently on easy and hard inputs. Three things help.
+**Check calibration on your own traffic.** A few hundred labelled examples are enough to draw a reliability diagram or fit a temperature. If your traffic mixes easy and hard cases, check each kind separately.
 
-**Calibrate on your own data.** A few hundred labelled examples from your real traffic are enough to fit a temperature or check a reliability diagram. Do it per slice if your traffic mixes easy and hard cases.
+**Pick models with a proper score.** Compare models with the Brier score or log loss. Treat ECE as a diagnostic, and always look at the reliability diagram.
 
-**Report proper scores.** Use the Brier score or log loss to compare models, ECE only as a diagnostic, and always look at the reliability diagram on the slices that matter.
+**Use conformal prediction when you need a guarantee.** Conformal prediction turns scores into a set of answers that contains the right one with a probability you choose, such as 90% [@angelopoulos2021]. The guarantee holds even when the probabilities are miscalibrated, as long as your labelled examples look like your real traffic. Training helps here: at 90% coverage, JEV-9B's sets average 1.75 options against 2.04 for its base model, and JEV-27B's average 1.43.
 
-**Use conformal prediction when you need a guarantee.** Conformal prediction turns a model's scores into a set of answers that contains the right one with a chosen probability, such as 90%, using a small labelled calibration set [@angelopoulos2021]. Its guarantee holds even when the probabilities are miscalibrated. It does depend on the calibration data looking like the test data, the same assumption temperature scaling needs. Here training clearly helps: at 90% coverage, JEV-9B's prediction sets average 1.75 options against 2.04 for its base model, and JEV-27B's average 1.43. Better resolution shows up as smaller sets.
+## The fine print
 
-## Limitations
+- **One format per model.** On the exam benchmarks every model got lettered options. A model tuned to another format may do a little better in its authors' own tests.
+- **Ratings, asked as multiple choice.** JEV's rating slots can't show what each level means, so we asked rating questions as multiple choice over the level descriptions. That was more accurate than the alternative we tried.
+- **A few skipped questions.** JPT-4B's server couldn't read some inputs and skipped about 2% of the decision-benchmark questions.
+- **The teacher is still untested.** We haven't yet run TypeSafe's own Jev on these questions. That would show whether the hard–easy pattern lives in the teacher too, and it's next.
 
-On the multiple-choice benchmarks, each model was asked in one format, lettered options with the option text attached. A model tuned for a different format may do somewhat better in its authors' own tests. On the decision benchmarks, JEV's rating slots cannot show what each level means, so we asked rating questions as multiple choice over the level descriptions; that was more accurate than the alternative we tried. JPT-4B's server could not read some inputs and skipped about 2% of the decision-benchmark questions. One very long GPQA question is missing from JEV-27B's results because it did not fit in memory. Finally, we have not yet run TypeSafe's own Jev on these questions. That comparison would show whether the hard–easy pattern lives in the teacher too, and it is next.
+## Try it yourself
 
-## Run it yourself
-
-Every number in this post comes from the [repository](https://github.com/harit7/jev-croq), and the data behind every chart can be downloaded from the [leaderboard](/leaderboards/jev-calibration/). This scores JEV-9B on two of the benchmarks:
+Every number here comes from the [repository](https://github.com/harit7/jev-croq), and the data behind every chart can be downloaded from the leaderboards. This scores JEV-9B on two of the benchmarks:
 
 ```bash
 # answers are cached, so a rerun only scores new questions
