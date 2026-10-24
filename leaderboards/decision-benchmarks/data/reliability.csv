@@ -1,0 +1,81 @@
+model,benchmark,kind,bin,bin_low,bin_high,count,mean_confidence,accuracy
+JEV-9B,Kev suites,all,0,0.00000,0.10000,0,,
+JEV-9B,Kev suites,all,1,0.10000,0.20000,26,0.17454,0.15385
+JEV-9B,Kev suites,all,2,0.20000,0.30000,107,0.24964,0.25234
+JEV-9B,Kev suites,all,3,0.30000,0.40000,146,0.35471,0.32192
+JEV-9B,Kev suites,all,4,0.40000,0.50000,276,0.45832,0.44203
+JEV-9B,Kev suites,all,5,0.50000,0.60000,628,0.54967,0.55732
+JEV-9B,Kev suites,all,6,0.60000,0.70000,667,0.65019,0.63268
+JEV-9B,Kev suites,all,7,0.70000,0.80000,671,0.75149,0.73472
+JEV-9B,Kev suites,all,8,0.80000,0.90000,802,0.85008,0.84663
+JEV-9B,Kev suites,all,9,0.90000,1.00000,2765,0.97784,0.95371
+JEV-9B,Kev suites,choice,0,0.00000,0.10000,0,,
+JEV-9B,Kev suites,choice,1,0.10000,0.20000,26,0.17454,0.15385
+JEV-9B,Kev suites,choice,2,0.20000,0.30000,104,0.24870,0.25000
+JEV-9B,Kev suites,choice,3,0.30000,0.40000,99,0.35060,0.30303
+JEV-9B,Kev suites,choice,4,0.40000,0.50000,149,0.46178,0.43624
+JEV-9B,Kev suites,choice,5,0.50000,0.60000,218,0.55097,0.55963
+JEV-9B,Kev suites,choice,6,0.60000,0.70000,222,0.64716,0.64414
+JEV-9B,Kev suites,choice,7,0.70000,0.80000,215,0.75233,0.71628
+JEV-9B,Kev suites,choice,8,0.80000,0.90000,296,0.85137,0.81081
+JEV-9B,Kev suites,choice,9,0.90000,1.00000,1591,0.98332,0.94909
+JEV-9B,Kev suites,noul,0,0.00000,0.10000,0,,
+JEV-9B,Kev suites,noul,1,0.10000,0.20000,0,,
+JEV-9B,Kev suites,noul,2,0.20000,0.30000,0,,
+JEV-9B,Kev suites,noul,3,0.30000,0.40000,0,,
+JEV-9B,Kev suites,noul,4,0.40000,0.50000,0,,
+JEV-9B,Kev suites,noul,5,0.50000,0.60000,225,0.54830,0.59556
+JEV-9B,Kev suites,noul,6,0.60000,0.70000,307,0.65383,0.65147
+JEV-9B,Kev suites,noul,7,0.70000,0.80000,371,0.75081,0.75472
+JEV-9B,Kev suites,noul,8,0.80000,0.90000,405,0.84975,0.90617
+JEV-9B,Kev suites,noul,9,0.90000,1.00000,980,0.97024,0.97347
+JEV-9B,Kev suites,score,0,0.00000,0.10000,0,,
+JEV-9B,Kev suites,score,1,0.10000,0.20000,0,,
+JEV-9B,Kev suites,score,2,0.20000,0.30000,3,0.28246,0.33333
+JEV-9B,Kev suites,score,3,0.30000,0.40000,47,0.36338,0.36170
+JEV-9B,Kev suites,score,4,0.40000,0.50000,127,0.45426,0.44882
+JEV-9B,Kev suites,score,5,0.50000,0.60000,185,0.54981,0.50811
+JEV-9B,Kev suites,score,6,0.60000,0.70000,138,0.64696,0.57246
+JEV-9B,Kev suites,score,7,0.70000,0.80000,85,0.75234,0.69412
+JEV-9B,Kev suites,score,8,0.80000,0.90000,101,0.84758,0.71287
+JEV-9B,Kev suites,score,9,0.90000,1.00000,194,0.97132,0.89175
+"Qwen3.5-9B, untrained",Kev suites,all,0,0.00000,0.10000,3,0.09739,0.00000
+"Qwen3.5-9B, untrained",Kev suites,all,1,0.10000,0.20000,38,0.16537,0.21053
+"Qwen3.5-9B, untrained",Kev suites,all,2,0.20000,0.30000,213,0.25666,0.26761
+"Qwen3.5-9B, untrained",Kev suites,all,3,0.30000,0.40000,375,0.35465,0.44267
+"Qwen3.5-9B, untrained",Kev suites,all,4,0.40000,0.50000,505,0.45125,0.54059
+"Qwen3.5-9B, untrained",Kev suites,all,5,0.50000,0.60000,927,0.55327,0.56095
+"Qwen3.5-9B, untrained",Kev suites,all,6,0.60000,0.70000,971,0.64923,0.64882
+"Qwen3.5-9B, untrained",Kev suites,all,7,0.70000,0.80000,1030,0.75202,0.76408
+"Qwen3.5-9B, untrained",Kev suites,all,8,0.80000,0.90000,1129,0.84804,0.89371
+"Qwen3.5-9B, untrained",Kev suites,all,9,0.90000,1.00000,897,0.93972,0.95095
+"Qwen3.5-9B, untrained",Kev suites,choice,0,0.00000,0.10000,3,0.09739,0.00000
+"Qwen3.5-9B, untrained",Kev suites,choice,1,0.10000,0.20000,38,0.16537,0.21053
+"Qwen3.5-9B, untrained",Kev suites,choice,2,0.20000,0.30000,201,0.25629,0.25373
+"Qwen3.5-9B, untrained",Kev suites,choice,3,0.30000,0.40000,296,0.35379,0.44932
+"Qwen3.5-9B, untrained",Kev suites,choice,4,0.40000,0.50000,300,0.45383,0.60333
+"Qwen3.5-9B, untrained",Kev suites,choice,5,0.50000,0.60000,472,0.54977,0.62712
+"Qwen3.5-9B, untrained",Kev suites,choice,6,0.60000,0.70000,502,0.65138,0.71713
+"Qwen3.5-9B, untrained",Kev suites,choice,7,0.70000,0.80000,518,0.75210,0.79730
+"Qwen3.5-9B, untrained",Kev suites,choice,8,0.80000,0.90000,416,0.84819,0.94471
+"Qwen3.5-9B, untrained",Kev suites,choice,9,0.90000,1.00000,174,0.93250,0.95977
+"Qwen3.5-9B, untrained",Kev suites,noul,0,0.00000,0.10000,0,,
+"Qwen3.5-9B, untrained",Kev suites,noul,1,0.10000,0.20000,0,,
+"Qwen3.5-9B, untrained",Kev suites,noul,2,0.20000,0.30000,0,,
+"Qwen3.5-9B, untrained",Kev suites,noul,3,0.30000,0.40000,0,,
+"Qwen3.5-9B, untrained",Kev suites,noul,4,0.40000,0.50000,0,,
+"Qwen3.5-9B, untrained",Kev suites,noul,5,0.50000,0.60000,276,0.55473,0.57246
+"Qwen3.5-9B, untrained",Kev suites,noul,6,0.60000,0.70000,254,0.65009,0.72441
+"Qwen3.5-9B, untrained",Kev suites,noul,7,0.70000,0.80000,390,0.75217,0.74872
+"Qwen3.5-9B, untrained",Kev suites,noul,8,0.80000,0.90000,653,0.84922,0.86371
+"Qwen3.5-9B, untrained",Kev suites,noul,9,0.90000,1.00000,715,0.94176,0.94825
+"Qwen3.5-9B, untrained",Kev suites,score,0,0.00000,0.10000,0,,
+"Qwen3.5-9B, untrained",Kev suites,score,1,0.10000,0.20000,0,,
+"Qwen3.5-9B, untrained",Kev suites,score,2,0.20000,0.30000,12,0.26291,0.50000
+"Qwen3.5-9B, untrained",Kev suites,score,3,0.30000,0.40000,79,0.35791,0.41772
+"Qwen3.5-9B, untrained",Kev suites,score,4,0.40000,0.50000,205,0.44748,0.44878
+"Qwen3.5-9B, untrained",Kev suites,score,5,0.50000,0.60000,179,0.56024,0.36872
+"Qwen3.5-9B, untrained",Kev suites,score,6,0.60000,0.70000,215,0.64320,0.40000
+"Qwen3.5-9B, untrained",Kev suites,score,7,0.70000,0.80000,122,0.75117,0.67213
+"Qwen3.5-9B, untrained",Kev suites,score,8,0.80000,0.90000,60,0.83419,0.86667
+"Qwen3.5-9B, untrained",Kev suites,score,9,0.90000,1.00000,8,0.91383,1.00000

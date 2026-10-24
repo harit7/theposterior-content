@@ -1,0 +1,3 @@
+model,decision-v7-development,decision-v7-test,transfer-v4-development,transfer-v4-test,transfer-v9-development,transfer-v9-test,kev_score,published
+JEV-9B,83.30696,79.66667,81.40244,82.31707,73.96194,72.92388,78.92983,
+"Qwen3.5-9B, untrained",75.63291,73.25000,73.01829,77.28659,62.71626,65.48443,71.23141,

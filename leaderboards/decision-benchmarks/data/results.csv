@@ -1,0 +1,9 @@
+model,benchmark,kind,labels,n,accuracy,conf_minus_acc,ece,brier,ece_floor,nll
+JEV-9B,Kev suites,all,ground truth,6088,0.78532,0.01596,0.02043,0.12951,0.01163,0.57270
+JEV-9B,Kev suites,choice,ground truth,2920,0.78562,0.02805,0.03266,0.12021,0.01602,0.64747
+JEV-9B,Kev suites,noul,ground truth,2288,0.84572,-0.01633,0.02223,0.11074,0.01653,0.34921
+JEV-9B,Kev suites,score,ground truth,880,0.62727,0.05977,0.06210,0.20915,0.03496,0.90571
+"Qwen3.5-9B, untrained",Kev suites,all,ground truth,6088,0.70680,-0.02672,0.03683,0.17358,0.01457,0.74376
+"Qwen3.5-9B, untrained",Kev suites,choice,ground truth,2920,0.68562,-0.07256,0.07256,0.18251,0.02229,0.89248
+"Qwen3.5-9B, untrained",Kev suites,noul,ground truth,2288,0.81993,-0.01596,0.02629,0.13260,0.01763,0.42089
+"Qwen3.5-9B, untrained",Kev suites,score,ground truth,880,0.48295,0.09743,0.12585,0.25048,0.03880,1.08971
