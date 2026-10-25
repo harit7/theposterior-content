@@ -1,0 +1,24 @@
+model,maker,access,license,card,openrouter_id,host,snapshots,archived,rounded
+Jev 1.14,TypeSafe,hosted,API only,https://openrouter.ai/typesafe/jev-1.14,typesafe/jev-1.14-20261014,typesafe,,True,True
+Jev 1.13,TypeSafe,hosted,API only,https://openrouter.ai/typesafe/jev-1.13,typesafe/jev-1.13,typesafe,typesafe/jev-1.13-20260917,True,True
+Perplexity Decider v1.2,Perplexity,hosted,API only,https://openrouter.ai/perplexity/pplx-decider-v1.2,perplexity/pplx-decider-v1.2,perplexity,perplexity/pplx-decider-v1.2-20261016,True,False
+Perplexity Decider Flash v1.2,Perplexity,hosted,API only,https://openrouter.ai/perplexity/pplx-decider-flash-v1.2,perplexity/pplx-decider-flash-v1.2,perplexity,perplexity/pplx-decider-flash-v1.2-20261016,True,False
+Drex v1.5,Nace AI,hosted,API only,https://openrouter.ai/nace-ai/drex-v1.5,nace-ai/drex-v1.5,deepinfra,nace-ai/drex-v1.5-20261009,True,False
+Drex v2.0,Nace AI,hosted,API only,https://openrouter.ai/nace-ai/drex-v2.0,nace-ai/drex-v2.0,deepinfra,nace-ai/drex-v2.0-20261009,True,False
+Drex Max,Nace AI,hosted,API only,https://openrouter.ai/nace-ai/drex-max,nace-ai/drex-max,deepinfra,nace-ai/drex-max-20261016,True,False
+d1-ultra,Liquid AI,hosted,API only,https://openrouter.ai/liquid/d1-ultra,liquid/d1-ultra,liquid,liquid/d1-ultra-20261015,True,False
+GPT-6 Luna Decisions,OpenAI,hosted,API only,https://openrouter.ai/openai/gpt-6-luna-decisions,openai/gpt-6-luna-decisions,openai,openai/gpt-6-luna-decisions-20261006,True,True
+Clef,Cloudflare,hosted,API only,https://openrouter.ai/cloudflare/clef,cloudflare/clef,cloudflare,cloudflare/clef,True,False
+Clef Flash,Cloudflare,hosted,API only,https://openrouter.ai/cloudflare/clef-flash,cloudflare/clef-flash,cloudflare,cloudflare/clef-flash,True,False
+Clef Omni,Cloudflare,hosted,API only,https://openrouter.ai/cloudflare/clef-omni,cloudflare/clef-omni,cloudflare,cloudflare/clef-omni-20261009,True,False
+Mercury Decide,Inception,hosted,API only,https://openrouter.ai/inception/mercury-decide,inception/mercury-decide,inception,inception/mercury-decide-20260930,True,False
+Solar Decide,Upstage,hosted,API only,https://openrouter.ai/upstage/solar-decide,upstage/solar-decide,upstage,upstage/solar-decide-20260928,True,False
+Solar Decide Flash,Upstage,hosted,API only,https://openrouter.ai/upstage/solar-decide-flash,upstage/solar-decide-flash,upstage,upstage/solar-decide-flash-20261008,True,False
+JEV-9B,AutoTrust AI,open weights,Apache-2.0,https://huggingface.co/autotrust/JEV-9B,,,,True,False
+JEV-27B,AutoTrust AI,open weights,Apache-2.0,https://huggingface.co/autotrust/JEV-27B,,,,True,False
+"Qwen3.5-9B, untrained",Alibaba Qwen,open weights,Apache-2.0,https://huggingface.co/Qwen/Qwen3.5-9B,,,,True,False
+Kev-4B,Jared Palmer,open weights,Apache-2.0,https://huggingface.co/jaredpalmer/kev-4b,,,,True,False
+JPT-4B,kirp,open weights,CC BY-NC 4.0,https://huggingface.co/kirp/jpt-4b,,,,True,False
+Strands Decider 2B,Amazon Strands Labs,open weights,Apache-2.0,https://huggingface.co/StrandsAgents/strands-decider-2B-qwen3.5-v1-2610,,,,True,False
+Open-Jev-2B,Zefan Cai,open weights,Apache-2.0,https://huggingface.co/ZefanCai/Open-Jev-2B,,,,True,False
+Laya,Convai Innovations,open weights,Apache-2.0,https://huggingface.co/convaiinnovations/laya,,,,True,False

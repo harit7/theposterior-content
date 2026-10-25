@@ -1,18 +1,32 @@
 ---
 title: JEV calibration leaderboard
-summary: Whether open Jev-style decision models are right as often as they say they are, measured against human gold labels on standard benchmarks.
+summary: Whether Jev, thirteen other hosted decision models and eight open-weight ones are right as often as they say they are, all asked the same exam-style questions.
 authors: [harit]
 date: 2026-10-24
+updated:
+  - date: 2026-10-25
+    note: Added Jev 1.13, Jev 1.14 and thirteen other hosted decision models; every model is now scored on the same questions.
 topics: [Calibration, Evaluation, Decision models]
 post: jev-calibration
+data: decision-models
 ---
 
-Eight models, scored on accuracy, expected calibration error (ECE) and the Brier score. Pick a dataset to see every model on it, or a model to see its reliability diagram.
+Twenty-three decision models, scored on accuracy, expected calibration error (ECE) and the Brier score. Every model was asked exactly the same questions. Pick a dataset to see every model on it, or a model to see its reliability diagram.
 
 <JevBoard />
 
 ## Models
 
-JEV-9B and JEV-27B are AutoTrust's open copies of Jev, trained on Jev's own answers. Qwen3.5-9B, untrained, is the same base model read out the same way without that training. The other rows are Jev-style models from other teams, each run through the server its authors ship. Each model name links to its model card.
+Fifteen models are hosted: TypeSafe's Jev 1.13 and 1.14 and thirteen decision models from Perplexity, Nace AI, Liquid AI, OpenAI, Cloudflare, Inception and Upstage. We asked them through OpenRouter in October 2026, each pinned to its maker's own servers. Each name links to the model's OpenRouter page.
 
-Each model was asked with lettered options, the format Jev's documentation uses. A model tuned to another format may score a little lower here than in its authors' own tests.
+Eight models have open weights. JEV-9B and JEV-27B are AutoTrust's open copies of Jev, trained on Jev 1.13's answers. Qwen3.5-9B, untrained, is the same base model read out the same way without that training. The rest are Jev-style models from other teams, each run through the server its authors ship. Each name links to its model card. Open models were asked with lettered options, the format Jev's documentation uses, so a model tuned to another format may score a little lower here than in its authors' own tests.
+
+## Same questions for everyone
+
+MMLU and MMLU-Pro are cut to 2,000 questions each and BANKING77 to 1,000, sampled in proportion to subject. Every other dataset is used in full. A few models could not answer everything:
+
+- **Solar Decide and Solar Decide Flash** take at most 26 options, so they skipped Under Pressure at 64 options and BANKING77.
+- **GPT-6 Luna Decisions** refused 5 questions in the summary datasets.
+- **JEV-27B** ran out of GPU memory on MMLU-Pro, BANKING77 and Under Pressure at 64 options.
+
+None of those datasets are in the summary. Jev and GPT-6 Luna round their probabilities to two decimals, which barely moves accuracy, ECE or the Brier score.
