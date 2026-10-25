@@ -17,6 +17,14 @@ Questions come in three kinds. Multiple choice picks one of several options, yes
 
 <DecisionBoard />
 
+## What we found
+
+**Perplexity's Decider v1.2 leads,** with Drex Max close behind. On these benchmarks it is right more than nine times out of ten, and its confidence tracks its accuracy almost exactly. Jev sits in the middle of the pack here, behind several hosted models it beats on exam questions.
+
+**Most models are surer than they should be on fact checks.** VitaminC asks whether evidence supports a claim, and nearly every model, Jev included, is overconfident on it. Among hosted models, only Perplexity's two and d1-ultra stay calibrated on it.
+
+**Question type matters.** Many models handle yes/no questions well and struggle more with ratings, so a model's overall rank can hide a weak spot. The chart above shows each model by question type.
+
 ## How the models were asked
 
 Hosted models were asked through OpenRouter in October 2026, each pinned to its maker's own servers, with every question in its native form. Open models were run through the servers their authors ship, also with native questions. JEV models answered multiple-choice and yes/no questions through their own decision slots. Their rating slots are a fixed 0 to 5 scale without level descriptions, so rating questions were asked as multiple choice over the level descriptions. We also tried JEV's rating slots with the descriptions written into the question; that was less accurate for both JEV models (62.1% against 64.9% for JEV-27B, 54.0% against 61.5% for JEV-9B).

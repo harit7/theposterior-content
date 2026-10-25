@@ -15,6 +15,20 @@ Twenty-three decision models, scored on accuracy, expected calibration error (EC
 
 <JevBoard />
 
+## What we found
+
+**Perplexity's Decider is the one to beat.** It tops this board and the [decision benchmarks](/leaderboards/decision-benchmarks/). Jev is near the top here, on exam questions, but lands in the middle of the pack on decision questions.
+
+**Jev knows when it is right. Its open copies are less sure of that.** Jev's confidence matches its accuracy on every standard exam set, from easy ones like ARC to the very hard GPQA. JEV-9B and JEV-27B were trained to copy Jev's answers, and they undersell themselves on easy questions and oversell on hard ones. Our guess is that they learned how confident Jev is, and that much confidence is too much for a smaller model that knows less.
+
+**Training on Jev's answers makes a model bolder everywhere.** The untrained Qwen model is too timid almost across the board. After training, the middle of the range looks right, easy sets stay a little timid, and the hardest set tips into overconfidence. Kev, JPT, Strands Decider and Open-Jev were trained on their own data and lean the same way. Laya, a small encoder, is overconfident almost everywhere.
+
+**Some blind spots are shared, Jev included.** When the right answer is buried among many options, as in Under Pressure, most models are surer than they should be. d1-ultra is the steadiest model we tested: no dataset pushes its confidence far from its accuracy.
+
+**Solar Decide sounds the most certain without earning it,** with Mercury Decide close behind.
+
+**What it means in practice.** If you act on every answer above a fixed confidence, you will let through more mistakes on hard questions than on easy ones, and how many depends on the model. Check calibration on your own task, or use conformal prediction, which keeps its guarantee even when the probabilities are off.
+
 ## Models
 
 Fifteen models are hosted: TypeSafe's Jev 1.13 and 1.14 and thirteen decision models from Perplexity, Nace AI, Liquid AI, OpenAI, Cloudflare, Inception and Upstage. We asked them through OpenRouter in October 2026, each pinned to its maker's own servers. Each name links to the model's OpenRouter page.
